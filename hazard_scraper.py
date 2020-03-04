@@ -8,11 +8,18 @@
 
 from pandas.io.html import read_html
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 import math
 import pandas as pd
+import time
 
-driver = webdriver.Chrome()
+#driver = webdriver.Chrome()
+driver = webdriver.Chrome(executable_path='/home/manuel/3. git/RASFF_portal_python_scrapper/chromedriver')
 driver.get('https://webgate.ec.europa.eu/rasff-window/portal/#')
+
+
+#df = pd.DataFrame(data, columns=['Reference','Subject','Hazard'])
+#print (df)
 
 get_results = driver.find_element_by_id("Btn_Search")
 get_results.click()
@@ -38,23 +45,52 @@ while(results_number > 0):
     print('Agregando codigos de la pagina {0} de {1}'.format(current_page, total_pages))
     rows = driver.find_elements_by_xpath('//tr') #selecting rows from table
     #print(type(rows[1]))
-    results_table = [] # temporal table for each page
+    
     #print(len(rows))
     for i in range(1,len(rows)):
-        #Acceder a details para cada row!
-        driver.get('https://webgate.ec.europa.eu/rasff-window/portal/?event=notificationDetail&NOTIF_REFERENCE='+)
-
-
-
-
-        temp = [] # tabla temporal para cada row de cada resultado
-        #print('Pos: {0} - Content: {1}'.format(i, rows[i].text))
         columns = rows[i].find_elements_by_css_selector("td")
-        for column in columns:
-            temp.append(column.text)
-        results_table.append(temp)
+        current_reference_code = columns[3].text
+        current_subject_code = columns[5].text
+        #current_details = columns[9]
         
+        print(current_reference_code)
+        print(current_subject_code)
+        #print(current_details)
 
+
+        details_link = 'https://webgate.ec.europa.eu/rasff-window/portal/?event=notificationDetail&NOTIF_REFERENCE='+current_reference_code #Acceder a details para cada row!
+        get_link = driver.find_element_by_xpath('//a[@href="'+details_link+'"]')
+        get_link.click()
+        
+       
+        driver.switch_to.window(driver.window_handles[1])  #Access to new tab
+        #print("entre!!")
+        #recuperar los hazards yguardar todo en un data frame
+        time.sleep(2)
+        hazards = driver.find_elements_by_xpath('//*[@id="hazards"]/tbody/tr') #selecting rows from table
+        for h in hazards:
+            #print(h.text)
+            hazard_columns = h.find_elements_by_css_selector("td")
+            print(hazard_columns[0].text)
+        print('  ')
+        #hazards = driver.find_elements_by_xpath('//tr') #selecting rows from table
+        # for j in range(1,len(hazards)):
+        #     hazard_columns = hazards[j].find_elements_by_css_selector("td")
+        #     print(hazard_columns[0].text)
+        #time.sleep(3)
+       
+        driver.close() #Close new tab
+       
+        driver.switch_to.window(driver.window_handles[0]) #return to original tab
+
+
+        #print(current_details.text)
+        #details_link = 'https://webgate.ec.europa.eu/rasff-window/portal/?event=notificationDetail&NOTIF_REFERENCE='+current_reference_code #Acceder a details para cada row!
+        #get_link = driver.find_element_by_tag_name("a href="+details_link)
+        #get_link.click()
+        
+        
+        
     for a in results_table:
         ##### 1st. Get reference code
         reference_code = a[3]  
@@ -80,13 +116,7 @@ while(results_number > 0):
     
 
 
-#Store all data in pandas Dataframe
-    data = {'Reference':reference_codes,'Subject':subjects}
-    df = pd.DataFrame(data)
-    print (df)
-
-
-    
+  
 
 
 #table_results = driver.find_element_by_id("Result")
