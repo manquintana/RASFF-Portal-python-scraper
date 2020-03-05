@@ -41,10 +41,9 @@ while(results_number > 0):
     current_page = current_page + 1 
     #print('Agregando codigos de la pagina {0} de {1}'.format(current_page, total_pages))
     rows = driver.find_elements_by_xpath('//tr') #selecting rows from table
-
+    print('>>>')
+    print('Agregando codigos de la pagina {0} de {1}'.format(current_page, total_pages))
     for i in range(1,len(rows)):
-        print('>>>')
-        print('Agregando codigos de la pagina {0} de {1}'.format(current_page, total_pages))
         columns = rows[i].find_elements_by_css_selector("td")
         current_reference_code = columns[3].text
         current_subject = columns[5].text\
