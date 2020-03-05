@@ -47,11 +47,10 @@ while(results_number > 0):
         print('Agregando codigos de la pagina {0} de {1}'.format(current_page, total_pages))
         columns = rows[i].find_elements_by_css_selector("td")
         current_reference_code = columns[3].text
-        current_subject = columns[5].text
-        #current_details = columns[9]
+        current_subject = columns[5].text\
         
-        print(current_reference_code)
-        print(current_subject)
+        #print(current_reference_code)
+        #print(current_subject)
         
         details_link = 'https://webgate.ec.europa.eu/rasff-window/portal/?event=notificationDetail&NOTIF_REFERENCE='+current_reference_code #Acceder a details para cada row!
         get_link = driver.find_element_by_xpath('//a[@href="'+details_link+'"]')
@@ -64,20 +63,22 @@ while(results_number > 0):
         temp_list = []
         for h in hazards:
             hazard_columns = h.find_elements_by_css_selector("td")
-            print(hazard_columns[1].text)
+            #print(hazard_columns[1].text)
             temp_list.append(hazard_columns[1].text)
-        print('  ')
+        #print('  ')
         deduplicate = list(set(temp_list))
         for haz in deduplicate:
             temp_df = pd.DataFrame({'Reference':[current_reference_code],'Subject':[current_subject],'HazardCategory':[haz]})
             datos = datos.append(temp_df, ignore_index = True)
-            print('Data already scrapped:')
-            print(datos)    
+            #print('Data already scrapped:')
+            #print(datos)    
             
         driver.close() #Close new tab
         driver.switch_to.window(driver.window_handles[0]) #return to original tab
 
     results_number = results_number - 100
+    print('Data scrapped:')
+    print(datos)   
     if results_number > 0: #hay que seguir scrapeando!
         next_page = driver.find_element_by_link_text("Next 100")
         next_page.click()
