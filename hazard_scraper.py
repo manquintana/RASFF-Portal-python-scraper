@@ -58,7 +58,7 @@ current_page = 0
 total_pages = math.ceil(results_number/100)
 
 #Restore after error!!!
-error_page= 100 #Set error page. 0 if not error!!!!!!!!!!!!   #ME SALTEE LA 5,9,14 QUE FALLABA UN DATO SIEMPRE!!! ERA ilegal pork....
+error_page= 296 #Set error page. 0 if not error!!!!!!!!!!!!   #ME SALTEE LA 5,9,14 QUE FALLABA UN DATO SIEMPRE!!! ERA ilegal pork....
 for i in range(1,error_page): #hay que seguir scrapeando!
     time.sleep(1)
     results_number = results_number - 100
@@ -67,6 +67,7 @@ for i in range(1,error_page): #hay que seguir scrapeando!
     next_page.click()
 
 while(results_number > 0):
+    time.sleep(1)
     current_page = current_page + 1 
     #print('Agregando codigos de la pagina {0} de {1}'.format(current_page, total_pages))
     rows = driver.find_elements_by_xpath('//tr') #selecting rows from table
