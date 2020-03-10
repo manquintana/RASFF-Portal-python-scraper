@@ -1,10 +1,11 @@
 
-# This is a Py Scraper to obtain the correlation between Substance Hazard Category and Subject from the RASFF Portal #
+# This is a Py Scraper to obtain the correlation between Substance Hazard Category and Subject 
+# from the RASFF Portal for the European Comission #
 # Manuel Quintana 3/3/20
 
 
 #Strategy: obtener de las tablas de todas las paginas todos los REFERENCE de https://webgate.ec.europa.eu/rasff-window/portal/# tras apretar GET RESULTS
-#after that, execute https://webgate.ec.europa.eu/rasff-window/portal/?event=notificationDetail&NOTIF_REFERENCE=2020.0999 cambiando el REFERENCE POR CADA REFERENCE OBTENIDO. AHI ESTA TODA LA DATA
+#after that, execute https://webgate.ec.europa.eu/rasff-window/portal/?event=notificationDetail&NOTIF_REFERENCE=2020.0999 cambiando el REFERENCE POR CADA REFERENCE de la pagina actual (cada row)
 
 from pandas.io.html import read_html
 from selenium import webdriver
@@ -14,7 +15,7 @@ import pandas as pd
 import time
 import sqlalchemy
 
-# Base local
+# Local DB
 DB_USER = 'manuel'
 DB_PASS = 'jevi1717'
 DB_ADDR = 'localhost'
@@ -58,9 +59,9 @@ current_page = 0
 total_pages = math.ceil(results_number/100)
 
 #Restore after error!!!
-error_page= 296 #Set error page. 0 if not error!!!!!!!!!!!!   #ME SALTEE LA 5,9,14 QUE FALLABA UN DATO SIEMPRE!!! ERA ilegal pork....
-for i in range(1,error_page): #hay que seguir scrapeando!
-    time.sleep(1)
+error_page= 0 #Set error_page = 0 if not error, to scrapp from the beginning!!
+for i in range(1,error_page):
+    #time.sleep(1.5)
     results_number = results_number - 100
     current_page = current_page + 1 
     next_page = driver.find_element_by_link_text("Next 100")
@@ -92,7 +93,7 @@ while(results_number > 0):
         get_link.click()
                
         driver.switch_to.window(driver.window_handles[1])  #Access to new tab
-        #recuperar los hazards y guardar todo en un data frame
+        #Recover hazards and load them into a dataframe
         time.sleep(2)
         hazards = driver.find_elements_by_xpath('//*[@id="hazards"]/tbody/tr') #selecting rows from table
         temp_list = []
@@ -100,7 +101,6 @@ while(results_number > 0):
             hazard_columns = h.find_elements_by_css_selector("td")
             #print(hazard_columns[1].text)
             temp_list.append(hazard_columns[1].text)
-        #print('  ')
         deduplicate = list(set(temp_list))
         for haz in deduplicate:
             temp_df = pd.DataFrame({'Reference':[current_reference_code],'Subject':[current_subject],'HazardCategory':[haz]})
@@ -108,23 +108,20 @@ while(results_number > 0):
             #print('Data already scrapped:')
             #print(datos)    
             
-        driver.close() #Close new tab
-        driver.switch_to.window(driver.window_handles[0]) #return to original tab
+        driver.close() # Close new tab
+        driver.switch_to.window(driver.window_handles[0]) # Return to original tab
 
-    #Persist data
+    # Persist data
     print('Data scrapped:')
     print(datos)
     print('Saving data to Database')
     datos.rename(columns = {'Reference':'reference', 'Subject':'subject', 'HazardCategory':'hazard_category'}, inplace = True) 
     append_to_table(datos, 'subject_hazard')
     
-
-
     results_number = results_number - 100
-    if results_number > 0: #hay que seguir scrapeando!
+    if results_number > 0: # There are more pages to scrap!
+        time.sleep(1.5)
         next_page = driver.find_element_by_link_text("Next 100")
         next_page.click()
-    #Ya levante toda la data de la pagina actual
 
 print('The End!')
-
