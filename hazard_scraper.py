@@ -16,8 +16,8 @@ import time
 import sqlalchemy
 
 # Local DB
-DB_USER = 'manuel'
-DB_PASS = 'jevi1717'
+DB_USER = 'm...'
+DB_PASS = 'j...717'
 DB_ADDR = 'localhost'
 DB_NAME = 'rasff_hazards'
 DB_CONN = sqlalchemy.create_engine('mysql+mysqlconnector://{0}:{1}@{2}/{3}'.format(DB_USER, DB_PASS, DB_ADDR, DB_NAME))
@@ -70,23 +70,16 @@ for i in range(1,error_page):
 while(results_number > 0):
     time.sleep(1)
     current_page = current_page + 1 
-    #print('Agregando codigos de la pagina {0} de {1}'.format(current_page, total_pages))
     rows = driver.find_elements_by_xpath('//tr') #selecting rows from table
     
-       
     print('>>>')
     print('Agregando codigos de la pagina {0} de {1}'.format(current_page, total_pages))
     datos = pd.DataFrame(columns=['Reference','Subject','HazardCategory'])
-
-
 
     for i in range(1,len(rows)):
         columns = rows[i].find_elements_by_css_selector("td")
         current_reference_code = columns[3].text
         current_subject = columns[5].text
-        
-        #print(current_reference_code)
-        #print(current_subject)
         
         details_link = 'https://webgate.ec.europa.eu/rasff-window/portal/?event=notificationDetail&NOTIF_REFERENCE='+current_reference_code #Acceder a details para cada row!
         get_link = driver.find_element_by_xpath('//a[@href="'+details_link+'"]')
@@ -105,8 +98,6 @@ while(results_number > 0):
         for haz in deduplicate:
             temp_df = pd.DataFrame({'Reference':[current_reference_code],'Subject':[current_subject],'HazardCategory':[haz]})
             datos = datos.append(temp_df, ignore_index = True)
-            #print('Data already scrapped:')
-            #print(datos)    
             
         driver.close() # Close new tab
         driver.switch_to.window(driver.window_handles[0]) # Return to original tab
