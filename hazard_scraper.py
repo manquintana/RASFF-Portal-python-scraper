@@ -16,8 +16,8 @@ import time
 import sqlalchemy
 
 # Local DB
-DB_USER = 'm...'
-DB_PASS = 'j...717'
+DB_USER = '.....'
+DB_PASS = '.....'
 DB_ADDR = 'localhost'
 DB_NAME = 'rasff_hazards'
 DB_CONN = sqlalchemy.create_engine('mysql+mysqlconnector://{0}:{1}@{2}/{3}'.format(DB_USER, DB_PASS, DB_ADDR, DB_NAME))
